@@ -1,41 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class Visual : MonoBehaviour
 {
 
     [SerializeField] GameObject[] prefabs;
+    private string[,] matrix;
 
 
-    // Start is called before the first frame update
-    void Start()
+    void PlacePices()
     {
-        string[,] matrix = Logic.GenerateBoard();
+        matrix = GetComponent<Logic>().GenerateBoard();
 
-
-
-        for (int x = 0; x < 8; x++)
+        for (int row = 0; row < 8; row++)
         {
-            for (int y = 0; y < 8; y++)
+            for (int col = 0; col < 8; col++)
             {
+                string currCellPieceName = matrix[row, col];
+
+                if (currCellPieceName == null)
+                    continue;
+
                 foreach (GameObject go in prefabs)
                 {
-                    if (go.name == matrix[x, y])
+                    if (currCellPieceName == go.name)
                     {
-                        GameObject obj = Instantiate(go);
-                        go.transform.position = new Vector3(x, 0, y);
+                        Instantiate(go, new Vector3(row + 0.5f, 0.05f, col + 0.5f), Quaternion.Euler(-90, 0, 0));
                         break;
                     }
                 }
-
-                // Debug.Log(matrix[x, y]);
-
             }
         }
 
+    }
 
 
+
+
+    void Start()
+    {
+        PlacePices();
 
     }
 

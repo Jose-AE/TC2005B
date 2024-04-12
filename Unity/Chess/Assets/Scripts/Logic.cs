@@ -1,54 +1,49 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using System.Linq;
 
-public static class Logic
+public class Logic : MonoBehaviour
 {
-    private static Dictionary<string, int> counts = new Dictionary<string, int>();
+
+    private Dictionary<string, int> pieceCounts = new Dictionary<string, int>() {
+         { "Bishop_Black", 2 },
+         { "Bishop_White", 2 },
+         { "King_Black", 1 },
+         { "King_White", 1 },
+         { "Knight_Black", 2 },
+         { "Knight_White", 2 },
+         { "Pawn_Black", 8 },
+         { "Pawn_White", 8 },
+         { "Queen_Black", 1 },
+         { "Queen_White", 1 },
+         { "Rook_Black", 2 },
+         { "Rook_White", 2 }
+         };
 
 
-    private static void InitCounts()
+
+
+    public string[,] GenerateBoard()
     {
-        counts["Bishop_Black"] = 2;
-        counts["Bishop_White"] = 2;
-        counts["King_Black"] = 1;
-        counts["King_White"] = 1;
-        counts["Knight_Black"] = 2;
-        counts["Knight_White"] = 2;
-        counts["Pawn_Black"] = 8;
-        counts["Pawn_White"] = 8;
-        counts["Queen_Black"] = 1;
-        counts["Queen_White"] = 1;
-        counts["Rook_Black"] = 2;
-        counts["Rook_White"] = 2;
-    }
-
-
-    public static string[,] GenerateBoard()
-    {
-        InitCounts();
 
         string[,] matrix = new string[8, 8];
-
-        string[] keysArray = counts.Keys.ToArray();
-
+        string[] keysArray = pieceCounts.Keys.ToArray();
 
 
-
-
-        for (int x = 0; x < 8; x++)
+        foreach (string pieceName in keysArray)
         {
-            for (int y = 0; y < 8; y++)
+            while (pieceCounts[pieceName] > 0)
             {
-                string rngPiece = keysArray[Random.Range(0, keysArray.Length)];
-
-                matrix[x, y] = rngPiece;
+                Vector2Int rngPos = new Vector2Int(Random.Range(0, 8), Random.Range(0, 8));
+                if (matrix[rngPos.y, rngPos.x] == null)
+                {
+                    matrix[rngPos.y, rngPos.x] = pieceName;
+                    pieceCounts[pieceName] -= 1;
+                }
 
             }
-        }
 
+        }
 
         return matrix;
 
