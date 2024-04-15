@@ -25,7 +25,8 @@ public class Visual : MonoBehaviour
                 {
                     if (currCellPieceName == go.name)
                     {
-                        Instantiate(go, new Vector3(row + 0.5f, 0.05f, col + 0.5f), Quaternion.Euler(-90, 0, 0));
+                        GameObject piece = Instantiate(go, new Vector3(row + 0.5f, 0.05f, col + 0.5f), Quaternion.Euler(-90, 0, 0));
+                        piece.transform.SetParent(transform);
                         break;
                     }
                 }
@@ -34,13 +35,26 @@ public class Visual : MonoBehaviour
 
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            DeletePices();
+            PlacePices();
+        }
+    }
 
-
+    void DeletePices()
+    {
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
 
     void Start()
     {
         PlacePices();
-
     }
 
 }
