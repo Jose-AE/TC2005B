@@ -9,11 +9,12 @@ public class Visual : MonoBehaviour
     [SerializeField] GameObject xPrefab;
     [SerializeField] GameObject oPrefab;
 
+    private Logic logic = new Logic();
 
 
     void PlacePices()
     {
-        string[,] board = GetComponent<Logic>().GenerateGame();
+        string[,] board = logic.GenerateGame();
 
         for (int row = 0; row < 3; row++)
         {
