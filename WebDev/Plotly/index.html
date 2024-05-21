@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geometric Farm Stats</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <div id="level1_perf_shape" style="width: 600px; height: 400px"></div>
+    <div id="level2_perf_operation" style="width: 600px; height: 400px"></div>
+    <div
+      id="level3_perf_perimeter_shape"
+      style="width: 600px; height: 400px"
+    ></div>
+    <div id="level3_perf_area_shape" style="width: 600px; height: 400px"></div>
+    <div id="overall_score_dist" style="width: 600px; height: 400px"></div>
+    <div id="avg_score_by_level" style="width: 600px; height: 400px"></div>
+
+    <script>
+      // Sample data for level 1
+      const level1Data = [];
+      for (let i = 1; i <= 1000; i++) {
+        const shapeOptions = [
+          "Circulo",
+          "Triangulo",
+          "Rectangulo",
+          "Paralelogramo",
+          "Cuadrado",
+          "Rombo",
+          "Trapecio",
+          "Pentagono",
+          "Hexagono",
+          "Octagono",
+        ];
+        const selectedShape =
+          shapeOptions[Math.floor(Math.random() * shapeOptions.length)];
+        const expectedShape =
+          shapeOptions[Math.floor(Math.random() * shapeOptions.length)];
+        const isCorrect = Math.random() > 0.1;
+        level1Data.push({
+          student_id: i,
+          selected_shape: selectedShape,
+          expected_shape: expectedShape,
+          is_correct: isCorrect,
+        });
+      }
+
+      // Sample data for level 2
+      const level2Data = [];
+      for (let i = 1; i <= 1000; i++) {
+        const operationOptions = ["+", "-", "*"];
+        const operationType =
+          operationOptions[Math.floor(Math.random() * operationOptions.length)];
+        const isCorrect = Math.random() < 0.5;
+        level2Data.push({
+          student_id: i,
+          operation_type: operationType,
+          is_correct: isCorrect,
+        });
+      }
+
+      // Sample data for level 3
+      const level3Data = [];
+      for (let i = 1; i <= 1000; i++) {
+        const operationOptions = ["area", "perimeter"];
+        const shapeOptions = [
+          "Circulo",
+          "Triangulo",
+          "Rectangulo",
+          "Paralelogramo",
+          "Cuadrado",
+          "Rombo",
+          "Trapecio",
+          "Pentagono",
+          "Hexagono",
+          "Octagono",
+        ];
+        const operationType =
+          operationOptions[Math.floor(Math.random() * operationOptions.length)];
+        const shapeType =
+          shapeOptions[Math.floor(Math.random() * shapeOptions.length)];
+        const isCorrect = Math.random() < 0.5;
+        level3Data.push({
+          student_id: i,
+          operation_type: operationType,
+          shape_type: shapeType,
+          is_correct: isCorrect,
+        });
+      }
+
+      // Sample level scores
+      const levelScores = [];
+      for (let i = 1; i <= 1000; i++) {
+        const score = Math.floor(Math.random() * 101);
+        const level = Math.floor(Math.random() * 3) + 1;
+        levelScores.push({ student_id: i, level: level, score: score });
+      }
+
+      // Helper function to calculate percentages
+      function calculatePercentages(data, key, value) {
+        const total = data.length;
+        const correct = data.filter(
+          (d) => d[key] === value && d.is_correct
+        ).length;
+        const incorrect = total - correct;
+        return {
+          correct: (correct / total) * 100,
+          incorrect: (incorrect / total) * 100,
+        };
+      }
+
+      // 1. Performance by Shape (Level 1)
+      function plotLevel1Performance(data) {
+        const shapes = [...new Set(data.map((d) => d.selected_shape))];
+        const correctPerc = shapes.map(
+          (shape) => calculatePercentages(data, "selected_shape", shape).correct
+        );
+        const incorrectPerc = shapes.map(
+          (shape) =>
+            calculatePercentages(data, "selected_shape", shape).incorrect
+        );
+
+        const trace1 = {
+          x: shapes,
+          y: correctPerc,
+          name: "Correct",
+          type: "bar",
+        };
+
+        const trace2 = {
+          x: shapes,
+          y: incorrectPerc,
+          name: "Incorrect",
+          type: "bar",
+        };
+
+        const layout = {
+          barmode: "stack",
+          title: "Performance by Shape (Level 1)",
+          xaxis: { title: "Shape Type" },
+          yaxis: { title: "Percentage" },
+        };
+
+        Plotly.newPlot("level1_perf_shape", [trace1, trace2], layout);
+      }
+
+      // 2. Performance by Operation (Level 2)
+      function plotLevel2Performance(data) {
+        const operations = [...new Set(data.map((d) => d.operation_type))];
+        const correctPerc = operations.map(
+          (op) => calculatePercentages(data, "operation_type", op).correct
+        );
+        const incorrectPerc = operations.map(
+          (op) => calculatePercentages(data, "operation_type", op).incorrect
+        );
+
+        const trace1 = {
+          x: operations,
+          y: correctPerc,
+          name: "Correct",
+          type: "bar",
+        };
+
+        const trace2 = {
+          x: operations,
+          y: incorrectPerc,
+          name: "Incorrect",
+          type: "bar",
+        };
+
+        const layout = {
+          barmode: "stack",
+          title: "Performance by Operation (Level 2)",
+          xaxis: { title: "Operation Type" },
+          yaxis: { title: "Percentage" },
+        };
+
+        Plotly.newPlot("level2_perf_operation", [trace1, trace2], layout);
+      }
+
+      // 3. Performance by Perimeter vs Shape (Level 3)
+      function plotLevel3PerformancePerimeter(data) {
+        const filteredData = data.filter(
+          (d) => d.operation_type === "perimeter"
+        );
+        const shapes = [...new Set(filteredData.map((d) => d.shape_type))];
+        const correctPerc = shapes.map(
+          (shape) =>
+            calculatePercentages(filteredData, "shape_type", shape).correct
+        );
+        const incorrectPerc = shapes.map(
+          (shape) =>
+            calculatePercentages(filteredData, "shape_type", shape).incorrect
+        );
+
+        const trace1 = {
+          x: shapes,
+          y: correctPerc,
+          name: "Correct",
+          type: "bar",
+        };
+
+        const trace2 = {
+          x: shapes,
+          y: incorrectPerc,
+          name: "Incorrect",
+          type: "bar",
+        };
+
+        const layout = {
+          barmode: "stack",
+          title: "Performance by Perimeter vs Shape (Level 3)",
+          xaxis: { title: "Shape Type" },
+          yaxis: { title: "Percentage" },
+        };
+
+        Plotly.newPlot("level3_perf_perimeter_shape", [trace1, trace2], layout);
+      }
+
+      // 3. Performance by Area vs Shape (Level 3)
+      function plotLevel3PerformanceArea(data) {
+        const filteredData = data.filter((d) => d.operation_type === "area");
+        const shapes = [...new Set(filteredData.map((d) => d.shape_type))];
+        const correctPerc = shapes.map(
+          (shape) =>
+            calculatePercentages(filteredData, "shape_type", shape).correct
+        );
+        const incorrectPerc = shapes.map(
+          (shape) =>
+            calculatePercentages(filteredData, "shape_type", shape).incorrect
+        );
+
+        const trace1 = {
+          x: shapes,
+          y: correctPerc,
+          name: "Correct",
+          type: "bar",
+        };
+
+        const trace2 = {
+          x: shapes,
+          y: incorrectPerc,
+          name: "Incorrect",
+          type: "bar",
+        };
+
+        const layout = {
+          barmode: "stack",
+          title: "Performance by Area vs Shape (Level 3)",
+          xaxis: { title: "Shape Type" },
+          yaxis: { title: "Percentage" },
+        };
+
+        Plotly.newPlot("level3_perf_area_shape", [trace1, trace2], layout);
+      }
+
+      // 4. Overall Score Distribution
+      function plotOverallScoreDistribution(data) {
+        const scores = data.map((d) => d.score);
+
+        const trace = {
+          x: scores,
+          type: "histogram",
+        };
+
+        const layout = {
+          title: "Overall Score Distribution",
+          xaxis: { title: "Score" },
+          yaxis: { title: "Number of Students" },
+        };
+
+        Plotly.newPlot("overall_score_dist", [trace], layout);
+      }
+
+      // 5. Average Score by Level
+      function plotAverageScoreByLevel(data) {
+        const levels = [1, 2, 3];
+        const avgScores = levels.map((level) => {
+          const levelScores = data
+            .filter((d) => d.level === level)
+            .map((d) => d.score);
+          return levelScores.reduce((a, b) => a + b, 0) / levelScores.length;
+        });
+
+        const trace = {
+          x: levels,
+          y: avgScores,
+          type: "bar",
+        };
+
+        const layout = {
+          title: "Average Score by Level",
+          xaxis: { title: "Level" },
+          yaxis: { title: "Average Score" },
+        };
+
+        Plotly.newPlot("avg_score_by_level", [trace], layout);
+      }
+
+      plotLevel1Performance(level1Data);
+      plotLevel2Performance(level2Data);
+      plotLevel3PerformancePerimeter(level3Data);
+      plotLevel3PerformanceArea(level3Data);
+      plotOverallScoreDistribution(levelScores);
+      plotAverageScoreByLevel(levelScores);
+    </script>
+  </body>
+</html>
